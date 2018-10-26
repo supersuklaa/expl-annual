@@ -1,0 +1,26 @@
+{
+  "name": "expl-annual",
+  "version": "0.0.1",
+  "description": "Website with annual data of expl-bot",
+  "main": "src/main.js",
+  "scripts": {
+    "build": "parcel build ./index.html",
+    "dev": "parcel ./index.html --open",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Antti Sartjärvi",
+  "license": "MIT",
+  "devDependencies": {
+    "eslint": "^5.8.0",
+    "eslint-config-airbnb-base": "^13.1.0",
+    "eslint-plugin-import": "^2.14.0",
+    "eslint-plugin-jsx-a11y": "^6.1.2",
+    "eslint-plugin-react": "^7.11.1",
+    "parcel-bundler": "^1.10.3",
+    "parcel-plugin-clean-dist": "0.0.6"
+  },
+  "dependencies": {
+    "d3": "^5.7.0",
+    "hyperapp": "^1.2.9"
+  }
+}
