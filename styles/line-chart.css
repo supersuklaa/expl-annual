@@ -1,0 +1,68 @@
+.graph-holder {
+  margin: 2em;
+}
+
+path.line {
+  stroke-width: 2;
+  fill: none;
+  opacity: .4;
+  z-index: 2;
+  transition: all .2s;
+}
+
+path.line.rexpls {
+  /* stroke: #179dbb;
+  fill: #179dbb; */
+  stroke: #13e0b0;
+  fill: #13e0b0;
+}
+path.line.expls {
+  stroke: #13e0b0;
+  fill: #13e0b0;
+}
+
+path.line.expls:hover,
+path.line.rexpls:hover {
+  stroke-width: 3.4;
+  z-index: 3;
+  opacity: 1;
+  cursor: pointer;
+}
+
+path.line.both {
+  fill: rgba(0, 0, 0, .3);
+  stroke-width: 0;
+}
+
+.y.axis {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+  /* display: none; */
+}
+
+.y.axis .tick > line {
+  display: none;
+}
+.y.axis .domain {
+  display: none;
+}
+
+.x.axis {
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.x.axis .tick > line {
+  display: none;
+}
+.x.axis .domain {
+  display: none;
+}
+
+label {
+  cursor: pointer;
+}
+
+label > div {
+  display: inline-block;
+  margin-right: 1em;
+  margin-left: .5em;
+}

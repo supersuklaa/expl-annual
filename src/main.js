@@ -1,8 +1,11 @@
-import { h, app } from 'hyperapp';
-import graph from './graph';
+import { app } from 'hyperapp';
+import * as d3 from 'd3';
+import actions from './actions';
+import view from './views';
 
-const state = {};
+d3.csv(require('../data/echo_history.csv')) // eslint-disable-line
+  .then((csv) => {
+    const state = { csv };
 
-const actions = {};
-
-app(state, actions, graph, document.body);
+    app(state, actions, view, document.body);
+  });

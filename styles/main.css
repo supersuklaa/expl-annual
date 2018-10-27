@@ -1,5 +1,9 @@
-path.line {
-  stroke: orange;
-  stroke-width: 2;
-  fill: none;
+body {
+  text-align: center;
+  background: #2b2b2b;
+  color: #717171;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
 }
+
+@import url('./line-chart.css');
+@import url('./block-chart.css');
