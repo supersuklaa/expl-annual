@@ -1,15 +1,23 @@
-
-
 rect.blocks.main {
   fill: #1e6554;
-  cursor: pointer;
   transition: all .2s;
-}
-
-rect.blocks.main:hover {
-  fill: #12a985;
 }
 
 rect.blocks.both {
   fill: #232323;
+}
+
+.label-text {
+  font-size: 11px;
+  transition: all .4s;
+  opacity: 0;
+}
+.active .label-text {
+  opacity: 1;
+}
+.label-text.main {
+  fill: #12a985;
+}
+.label-text.both {
+  fill: #525252;
 }

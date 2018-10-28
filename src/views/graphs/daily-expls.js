@@ -108,6 +108,76 @@ const draw = (elem, csv) => {
     .attr('class', 'y axis')
     .call(d3.axisLeft(y).ticks(3));
 
+  // Add the focus y-value hover efect
+  const focusMain = svg.append('g')
+    .attr('data-style', 'expls')
+    .attr('class', 'focus');
+
+  const focusBoth = svg.append('g')
+    .attr('class', 'focus');
+
+  const focusDate = svg.append('g')
+    .attr('class', 'focus');
+
+  const getLinePoint = (x0, data0) => {
+    const i = d3.bisector(d => d.date).left(data0, x0, 1);
+    const d0 = data0[i - 1];
+    const d1 = data0[i];
+    return x0 - d0.date > d1.date - x0 ? d1 : d0;
+  };
+
+  const mousemove = function () { //eslint-disable-line
+    const x0 = x.invert(d3.mouse(this)[0]);
+    const dataStyle = focusMain.attr('data-style');
+
+    const d = getLinePoint(x0, data[dataStyle]);
+    focusMain.attr('transform', `translate(${x(d.date)}, ${y(d.count)})`);
+    focusMain.select('text.main').text(d.count);
+
+    const d2 = getLinePoint(x0, data.both);
+    focusBoth.attr('transform', `translate(${x(d2.date)}, ${y(d2.count)})`);
+
+    if (y(d.count) - y(d2.count) < 10) {
+      focusBoth.select('text.both').attr('y', y(d.count) - y(d2.count) - 12);
+    } else {
+      focusBoth.select('text.both').attr('y', '0');
+    }
+    focusBoth.select('text.both').text(d2.count);
+
+    focusDate.attr('transform', `translate(${x(d.date)}, ${height + 17})`);
+    focusDate.select('text.date')
+      .text(d3.timeFormat('%-d.%-m')(d.date));
+  };
+
+  svg.append('rect')
+    .attr('class', 'overlay')
+    .attr('width', width)
+    .attr('height', height)
+    .on('mouseover', () => svg.attr('class', 'active'))
+    .on('mouseout', () => svg.attr('class', null))
+    .on('mousemove', mousemove);
+
+  focusMain.append('circle')
+    .attr('class', 'main')
+    .attr('r', 4.5);
+
+  focusMain.append('text')
+    .attr('class', 'main')
+    .attr('x', 9)
+    .attr('dy', '.35em');
+
+  focusBoth.append('circle')
+    .attr('class', 'both')
+    .attr('r', 4.5);
+
+  focusBoth.append('text')
+    .attr('class', 'both')
+    .attr('x', 9)
+    .attr('dy', '.35em');
+
+  focusDate.append('text')
+    .attr('class', 'date');
+
   // Event listener for radio buttons
   d3.selectAll('.daily input[type=radio]')
     .on('change', function () { // eslint-disable-line
@@ -117,6 +187,8 @@ const draw = (elem, csv) => {
         .duration(750)
         .attr('d', area(data[value]))
         .attr('class', `main line ${value}`);
+
+      focusMain.attr('data-style', value);
     });
 };
 

@@ -20,6 +20,7 @@ const draw = (elem, csv) => {
 
   // Parse the date / time
   const parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S.%f%Z');
+  const formatDay = d3.timeFormat('%Y-%m-%d');
   const formatWeekday = d3.timeFormat('%a');
 
   // Set the ranges
@@ -43,24 +44,37 @@ const draw = (elem, csv) => {
   const countExpls = {};
   const countRexpls = {};
 
+  // Count unique days for average
+  const uniqDays = {};
+
   csv.forEach((r) => {
     const date = parseDate(r.echoed_at);
-    const day = formatWeekday(date);
+    const wday = formatWeekday(date);
 
     if (r.was_random === 'TRUE') {
-      countRexpls[day] = countRexpls[day] ? countRexpls[day] + 1 : 1;
+      countRexpls[wday] = countRexpls[wday] ? countRexpls[wday] + 1 : 1;
     } else {
-      countExpls[day] = countExpls[day] ? countExpls[day] + 1 : 1;
+      countExpls[wday] = countExpls[wday] ? countExpls[wday] + 1 : 1;
     }
 
-    countBoth[day] = countBoth[day] ? countBoth[day] + 1 : 1;
+    countBoth[wday] = countBoth[wday] ? countBoth[wday] + 1 : 1;
+
+    const day = formatDay(date);
+
+    if (!uniqDays[wday]) {
+      uniqDays[wday] = [];
+    }
+
+    if (!uniqDays[wday].includes(day)) {
+      uniqDays[wday].push(day);
+    }
   });
 
   const mapData = d => Object.keys(d).map(key => ({
     date: key,
+    avg: Math.round(d[key] / uniqDays[key].length * 100) / 100,
     count: d[key],
   }));
-
 
   const data = {
     expls: mapData(countExpls),
@@ -71,29 +85,68 @@ const draw = (elem, csv) => {
   // Scale the range of the data
   x.domain(['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'])
     .paddingInner(0.1);
-  y.domain([0, d3.max(data.both, d => d.count)]);
+  y.domain([0, d3.max(data.both, d => d.avg)]);
+
+  // Mouse hover efects
+  const mouseout = function () { // eslint-disable-line
+    const dday = d3.select(this).attr('data-day');
+    d3.selectAll(`[data-day=${dday}`).attr('class', null);
+  };
+
+  const mouseover = function () { // eslint-disable-line
+    const dday = d3.select(this).attr('data-day');
+    d3.selectAll(`[data-day=${dday}`).attr('class', 'active');
+  };
 
   // Add the blocks.
-  svg.selectAll('rect.both')
+  const bothBlock = svg.selectAll('rect.both')
     .data(data.both)
     .enter()
-    .append('rect')
+    .append('g')
+    .attr('data-day', d => d.date);
+
+  bothBlock.append('rect')
     .attr('class', 'blocks both')
     .attr('x', d => x(d.date))
-    .attr('y', d => y(d.count))
-    .attr('height', d => height - y(d.count))
+    .attr('y', d => y(d.avg))
+    .attr('height', d => height - y(d.avg))
     .attr('width', x.bandwidth());
 
+  bothBlock.append('text')
+    .attr('x', d => x(d.date) + x.bandwidth() / 2)
+    .attr('y', d => y(d.avg) + 18)
+    .attr('text-anchor', 'middle')
+    .attr('class', 'label-text both')
+    .text(d => d.avg);
+
+  bothBlock
+    .on('mouseover', mouseover)
+    .on('mouseout', mouseout);
+
   // Add the blocks.
-  svg.selectAll('rect.main')
+  const mainBlock = svg.selectAll('rect.main')
     .data(data.expls)
     .enter()
-    .append('rect')
+    .append('g')
+    .attr('data-day', d => d.date);
+
+  mainBlock.append('rect')
     .attr('class', 'main blocks expls')
     .attr('x', d => x(d.date))
-    .attr('y', d => y(d.count))
-    .attr('height', d => height - y(d.count))
+    .attr('y', d => y(d.avg))
+    .attr('height', d => height - y(d.avg))
     .attr('width', x.bandwidth());
+
+  mainBlock
+    .on('mouseover', mouseover)
+    .on('mouseout', mouseout);
+
+  mainBlock.append('text')
+    .attr('x', d => x(d.date) + x.bandwidth() / 2)
+    .attr('y', d => y(d.avg) + 18)
+    .attr('text-anchor', 'middle')
+    .attr('class', 'label-text main')
+    .text(d => d.avg);
 
   // Add the X Axis
   svg.append('g')
@@ -111,13 +164,20 @@ const draw = (elem, csv) => {
     .on('change', function () { // eslint-disable-line
       const value = d3.select(this).attr('value');
 
+      mainBlock.select('text')
+        .data(data[value])
+        .transition()
+        .duration(750)
+        .text(d => d.avg)
+        .attr('y', d => y(d.avg) + 20);
+
       d3.select(elem).selectAll('.main.blocks')
         .data(data[value])
         .transition()
         .duration(750)
         .attr('class', `main blocks ${value}`)
-        .attr('y', d => y(d.count))
-        .attr('height', d => height - y(d.count));
+        .attr('y', d => y(d.avg))
+        .attr('height', d => height - y(d.avg));
     });
 };
 

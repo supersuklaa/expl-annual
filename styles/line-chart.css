@@ -6,15 +6,8 @@ path.line {
   stroke-width: 2;
   fill: none;
   transition: all .2s;
-  cursor: pointer;
   stroke: #1e6554;
   fill: #1e6554;
-}
-
-path.line.main:hover {
-  stroke-width: 3.4;
-  stroke: #12a985;
-  fill: #12a985;
 }
 
 path.line.both {
@@ -45,6 +38,12 @@ path.line.both {
 
 .x.axis {
   font-family: 'Comic Sans MS', cursive, sans-serif;
+  opacity: 1;
+  transition: .4s opacity;
+}
+
+.daily .active .x.axis {
+  opacity: 0;
 }
 
 .x.axis .tick > line {
@@ -54,30 +53,24 @@ path.line.both {
   display: none;
 }
 
-label {
-  cursor: pointer;
-}
-
-label > div {
-  display: inline-block;
-  margin-right: 1em;
-  margin-left: .5em;
-}
-.graph svg .focus text {
+.focus text {
   font-size: 11px;
 }
-.graph svg .focus text.main ,
-.graph svg .focus circle.main  {
+.focus text.main ,
+.focus circle.main {
   fill: #12a985;
 }
-.graph svg .focus text.both ,
-.graph svg .focus circle.both  {
+.focus text.both ,
+.focus circle.both {
   fill: #525252;
 }
-.graph svg .focus {
+.focus text.date {
+  fill: #717171;
+}
+.focus {
   display: none;
 }
-.graph svg:hover .focus {
+.active .focus {
   display: initial;
 }
 .overlay {

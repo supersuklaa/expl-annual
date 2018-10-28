@@ -115,6 +115,7 @@ const draw = (elem, csv) => {
     .attr('class', 'main line expls')
     .attr('d', area(data.expls));
 
+  // Add the focus y-value hover efect
   const focusMain = svg.append('g')
     .attr('data-style', 'expls')
     .attr('class', 'focus');
@@ -152,6 +153,8 @@ const draw = (elem, csv) => {
     .attr('class', 'overlay')
     .attr('width', width)
     .attr('height', height)
+    .on('mouseover', () => svg.attr('class', 'active'))
+    .on('mouseout', () => svg.attr('class', null))
     .on('mousemove', mousemove);
 
   focusMain.append('circle')
