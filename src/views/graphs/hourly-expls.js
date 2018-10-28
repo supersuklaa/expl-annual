@@ -20,21 +20,18 @@ const draw = (elem, csv) => {
 
   // Parse the date / time
   const parseDate = d3.timeParse('%Y-%m-%d %H:%M:%S.%f%Z');
-  const formatHour = d3.timeFormat('%H');
+  const formatDay = d3.timeFormat('%Y-%m-%d');
+  const formatHour = d3.timeFormat('%-H');
 
   // Set the ranges
   const x = d3.scaleTime().range([0, width]);
   const y = d3.scaleLinear().range([height, 0]);
 
-  // Define the axes
-  const xAxis = d3.axisBottom(x).ticks(24).tickFormat(d3.timeFormat('%H'));
-  const yAxis = d3.axisLeft(y).ticks(5);
-
   // define the area
   const area = d3.area()
     .x(d => x(d.date))
     .y0(height)
-    .y1(d => y(d.count))
+    .y1(d => y(d.avg))
     .curve(d3.curveMonotoneX);
 
   // Adds the svg canvas
@@ -50,6 +47,16 @@ const draw = (elem, csv) => {
   const countExpls = {};
   const countRexpls = {};
 
+  // Populate 0 for every hour
+  for (let i = 0; i <= 23; i++) { // eslint-disable-line
+    countBoth[i] = 0;
+    countExpls[i] = 0;
+    countRexpls[i] = 0;
+  }
+
+  // Count unique days for average
+  const uniqDays = [];
+
   csv.forEach((r) => {
     const date = parseDate(r.echoed_at);
     const hour = formatHour(date);
@@ -61,24 +68,42 @@ const draw = (elem, csv) => {
     }
 
     countBoth[hour] = countBoth[hour] ? countBoth[hour] + 1 : 1;
+
+    const day = formatDay(date);
+
+    if (!uniqDays.includes(day)) {
+      uniqDays.push(day);
+    }
   });
 
-  const popu = d => Object.keys(d)
+  const mapData = d => Object.keys(d)
     .map(key => ({
-      date: d3.timeParse('%Y-%m-%d %H:%M')(`2000-01-28 ${key}:15`),
+      date: d3.timeParse('%Y-%m-%d %H')(`2000-01-28 ${key}`),
+      avg: Math.round(d[key] / uniqDays.length * 100) / 100,
       count: d[key],
     }))
     .sort((a, b) => a.date - b.date);
 
   const data = {
-    expls: popu(countExpls),
-    rexpls: popu(countRexpls),
-    both: popu(countBoth),
+    expls: mapData(countExpls),
+    rexpls: mapData(countRexpls),
+    both: mapData(countBoth),
   };
 
   // Scale the range of the data
   x.domain(d3.extent(data.both, d => d.date));
-  y.domain([0, d3.max(data.both, d => d.count)]);
+  y.domain([0, d3.max(data.both, d => d.avg)]);
+
+  // Add the X gridlines
+  svg.append('g')
+    .attr('class', 'grid')
+    .attr('transform', `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(24).tickSize(-height).tickFormat(''));
+
+  // Add the X gridlines
+  svg.append('g')
+    .attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(5).tickSize(-width).tickFormat(''));
 
   // Add the area path.
   svg.append('path')
@@ -90,26 +115,87 @@ const draw = (elem, csv) => {
     .attr('class', 'main line expls')
     .attr('d', area(data.expls));
 
+  const focusMain = svg.append('g')
+    .attr('data-style', 'expls')
+    .attr('class', 'focus');
+
+  const focusBoth = svg.append('g')
+    .attr('class', 'focus');
+
+  const getLinePoint = (x0, data0) => {
+    const i = d3.bisector(d => d.date).left(data0, x0, 1);
+    const d0 = data0[i - 1];
+    const d1 = data0[i];
+    return x0 - d0.date > d1.date - x0 ? d1 : d0;
+  };
+
+  const mousemove = function () { //eslint-disable-line
+    const x0 = x.invert(d3.mouse(this)[0]);
+    const dataStyle = focusMain.attr('data-style');
+
+    const d = getLinePoint(x0, data[dataStyle]);
+    focusMain.attr('transform', `translate(${x(d.date)}, ${y(d.avg)})`);
+    focusMain.select('text.main').text(d.avg);
+
+    const d2 = getLinePoint(x0, data.both);
+    focusBoth.attr('transform', `translate(${x(d2.date)}, ${y(d2.avg)})`);
+
+    if (y(d.avg) - y(d2.avg) < 10) {
+      focusBoth.select('text.both').attr('y', y(d.avg) - y(d2.avg) - 12);
+    } else {
+      focusBoth.select('text.both').attr('y', '0');
+    }
+    focusBoth.select('text.both').text(d2.avg);
+  };
+
+  svg.append('rect')
+    .attr('class', 'overlay')
+    .attr('width', width)
+    .attr('height', height)
+    .on('mousemove', mousemove);
+
+  focusMain.append('circle')
+    .attr('class', 'main')
+    .attr('r', 4.5);
+
+  focusMain.append('text')
+    .attr('class', 'main')
+    .attr('x', 9)
+    .attr('dy', '.35em');
+
+  focusBoth.append('circle')
+    .attr('class', 'both')
+    .attr('r', 4.5);
+
+  focusBoth.append('text')
+    .attr('class', 'both')
+    .attr('x', 9)
+    .attr('dy', '.35em');
+
   // Add the X Axis
   svg.append('g')
     .attr('class', 'x axis')
     .attr('transform', `translate(0, ${height})`)
-    .call(xAxis);
+    .call(d3.axisBottom(x).ticks(24).tickFormat(d3.timeFormat('%H')));
 
   // Add the Y Axis
   svg.append('g')
     .attr('class', 'y axis')
-    .call(yAxis);
+    .call(d3.axisLeft(y).ticks(5));
 
   // Event listener for radio buttons
   d3.selectAll('.hourly input[type=radio]')
     .on('change', function () { // eslint-disable-line
       const value = d3.select(this).attr('value');
 
-      d3.select(elem).transition().select('.main.line')
+      d3.select(elem)
+        .transition()
+        .select('.main.line')
         .duration(750)
         .attr('d', area(data[value]))
         .attr('class', `main line ${value}`);
+
+      focusMain.attr('data-style', value);
     });
 };
 

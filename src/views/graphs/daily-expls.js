@@ -26,10 +26,6 @@ const draw = (elem, csv) => {
   const x = d3.scaleTime().range([0, width]);
   const y = d3.scaleLinear().range([height, 0]);
 
-  // Define the axes
-  const xAxis = d3.axisBottom(x).ticks(5);
-  const yAxis = d3.axisLeft(y).ticks(5);
-
   // define the area
   const area = d3.area()
     .x(d => x(d.date))
@@ -63,7 +59,7 @@ const draw = (elem, csv) => {
     countBoth[day] = countBoth[day] ? countBoth[day] + 1 : 1;
   });
 
-  const popu = d => Object.keys(d)
+  const mapData = d => Object.keys(d)
     .map(key => ({
       date: d3.timeParse('%Y-%m-%d')(key),
       count: d[key],
@@ -71,14 +67,25 @@ const draw = (elem, csv) => {
     .sort((a, b) => a.date - b.date);
 
   const data = {
-    expls: popu(countExpls),
-    rexpls: popu(countRexpls),
-    both: popu(countBoth),
+    expls: mapData(countExpls),
+    rexpls: mapData(countRexpls),
+    both: mapData(countBoth),
   };
 
   // Scale the range of the data
   x.domain(d3.extent(data.both, d => d.date));
   y.domain([0, d3.max(data.both, d => d.count)]);
+
+  // add the X gridlines
+  svg.append('g')
+    .attr('class', 'grid')
+    .attr('transform', `translate(0, ${height})`)
+    .call(d3.axisBottom(x).ticks(5).tickSize(-height).tickFormat(''));
+
+  // add the X gridlines
+  svg.append('g')
+    .attr('class', 'grid')
+    .call(d3.axisLeft(y).ticks(7).tickSize(-width).tickFormat(''));
 
   // Add the area path.
   svg.append('path')
@@ -94,12 +101,12 @@ const draw = (elem, csv) => {
   svg.append('g')
     .attr('class', 'x axis')
     .attr('transform', `translate(0, ${height})`)
-    .call(xAxis);
+    .call(d3.axisBottom(x).ticks(10).tickFormat(d3.timeFormat('%-d.%-m')));
 
   // Add the Y Axis
   svg.append('g')
     .attr('class', 'y axis')
-    .call(yAxis);
+    .call(d3.axisLeft(y).ticks(3));
 
   // Event listener for radio buttons
   d3.selectAll('.daily input[type=radio]')

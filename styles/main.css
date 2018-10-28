@@ -1,6 +1,7 @@
 body {
   text-align: center;
-  background: #2b2b2b;
+  background: #2f3133;
+  /* background: linear-gradient(to bottom, #cfe7fa 0%,#6393c1 100%); */
   color: #717171;
   font-family: 'Comic Sans MS', cursive, sans-serif;
 }

@@ -14,7 +14,7 @@ const draw = (elem, csv) => {
     left: 50,
   };
 
-  const width = 600 - margin.left - margin.right;
+  const width = 520 - margin.left - margin.right;
 
   const height = 350 - margin.top - margin.bottom;
 
@@ -56,16 +56,16 @@ const draw = (elem, csv) => {
     countBoth[day] = countBoth[day] ? countBoth[day] + 1 : 1;
   });
 
-  const popu = d => Object.keys(d).map(key => ({
+  const mapData = d => Object.keys(d).map(key => ({
     date: key,
     count: d[key],
   }));
 
 
   const data = {
-    expls: popu(countExpls),
-    rexpls: popu(countRexpls),
-    both: popu(countBoth),
+    expls: mapData(countExpls),
+    rexpls: mapData(countRexpls),
+    both: mapData(countBoth),
   };
 
   // Scale the range of the data

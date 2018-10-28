@@ -5,33 +5,30 @@
 path.line {
   stroke-width: 2;
   fill: none;
-  opacity: .4;
-  z-index: 2;
   transition: all .2s;
-}
-
-path.line.rexpls {
-  /* stroke: #179dbb;
-  fill: #179dbb; */
-  stroke: #13e0b0;
-  fill: #13e0b0;
-}
-path.line.expls {
-  stroke: #13e0b0;
-  fill: #13e0b0;
-}
-
-path.line.expls:hover,
-path.line.rexpls:hover {
-  stroke-width: 3.4;
-  z-index: 3;
-  opacity: 1;
   cursor: pointer;
+  stroke: #1e6554;
+  fill: #1e6554;
+}
+
+path.line.main:hover {
+  stroke-width: 3.4;
+  stroke: #12a985;
+  fill: #12a985;
 }
 
 path.line.both {
-  fill: rgba(0, 0, 0, .3);
+  fill: #232323;
+  opacity: .65;
   stroke-width: 0;
+}
+
+.grid {
+  display: none;
+  color: #232323;
+}
+.grid .domain {
+  display: none;
 }
 
 .y.axis {
@@ -65,4 +62,25 @@ label > div {
   display: inline-block;
   margin-right: 1em;
   margin-left: .5em;
+}
+.graph svg .focus text {
+  font-size: 11px;
+}
+.graph svg .focus text.main ,
+.graph svg .focus circle.main  {
+  fill: #12a985;
+}
+.graph svg .focus text.both ,
+.graph svg .focus circle.both  {
+  fill: #525252;
+}
+.graph svg .focus {
+  display: none;
+}
+.graph svg:hover .focus {
+  display: initial;
+}
+.overlay {
+  fill: none;
+  pointer-events: all;
 }
