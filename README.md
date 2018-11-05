@@ -2,6 +2,8 @@
 
 Data visualization of [expl-bot](https://github.com/majori/expl-bot)'s usage.
 
+![demo.gif](https://raw.githubusercontent.com/supersuklaa/expl-annual/master/images/demo.gif)
+
 ## Toolkit
 
 * [D3.js](https://d3js.org/)
