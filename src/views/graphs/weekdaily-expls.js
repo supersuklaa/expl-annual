@@ -1,8 +1,12 @@
 import { h } from 'hyperapp';
 import * as d3 from 'd3';
 
-const draw = (elem, csv) => {
-  if (!elem || !csv) {
+let elem;
+let source;
+let width;
+
+const draw = () => {
+  if (!elem || !source) {
     return;
   }
 
@@ -14,7 +18,13 @@ const draw = (elem, csv) => {
     left: 50,
   };
 
-  const width = 520 - margin.left - margin.right;
+  const newWidth = parseInt(d3.select(elem).style('width'), 10) - margin.left - margin.right;
+
+  if (newWidth === width) {
+    return;
+  }
+
+  width = newWidth;
 
   const height = 350 - margin.top - margin.bottom;
 
@@ -30,6 +40,9 @@ const draw = (elem, csv) => {
   // Define the axes
   const xAxis = d3.axisBottom(x).ticks(7);
   const yAxis = d3.axisLeft(y).ticks(5);
+
+  // Remove old canvas
+  d3.select(elem).select('svg').remove();
 
   // Adds the svg canvas
   const svg = d3.select(elem)
@@ -47,7 +60,7 @@ const draw = (elem, csv) => {
   // Count unique days for average
   const uniqDays = {};
 
-  csv.forEach((r) => {
+  source.forEach((r) => {
     const date = parseDate(r.echoed_at);
     const wday = formatWeekday(date);
 
@@ -181,6 +194,14 @@ const draw = (elem, csv) => {
     });
 };
 
+const init = (e, csv) => {
+  source = csv;
+  elem = e;
+  draw();
+};
+
+window.addEventListener('resize', draw);
+
 export default () => ({ csv }) => (
   <div class='graph-holder weekdaily'>
     <div class='blockstyle-selectors'>
@@ -193,7 +214,7 @@ export default () => ({ csv }) => (
         <div>?! rexpls</div>
       </label>
     </div>
-    <div class='graph' oncreate={e => draw(e, csv)}>
+    <div class='bar-graph' oncreate={e => init(e, csv)}>
     </div>
   </div>
 );

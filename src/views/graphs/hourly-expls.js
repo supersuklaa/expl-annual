@@ -1,8 +1,12 @@
 import { h } from 'hyperapp';
 import * as d3 from 'd3';
 
-const draw = (elem, csv) => {
-  if (!elem || !csv) {
+let elem;
+let source;
+let width;
+
+const draw = () => {
+  if (!elem || !source) {
     return;
   }
 
@@ -14,7 +18,13 @@ const draw = (elem, csv) => {
     left: 50,
   };
 
-  const width = 1000 - margin.left - margin.right;
+  const newWidth = parseInt(d3.select(elem).style('width'), 10) - margin.left - margin.right;
+
+  if (newWidth === width) {
+    return;
+  }
+
+  width = newWidth;
 
   const height = 450 - margin.top - margin.bottom;
 
@@ -33,6 +43,9 @@ const draw = (elem, csv) => {
     .y0(height)
     .y1(d => y(d.avg))
     .curve(d3.curveMonotoneX);
+
+  // Remove old canvas
+  d3.select(elem).select('svg').remove();
 
   // Adds the svg canvas
   const svg = d3.select(elem)
@@ -57,7 +70,7 @@ const draw = (elem, csv) => {
   // Count unique days for average
   const uniqDays = [];
 
-  csv.forEach((r) => {
+  source.forEach((r) => {
     const date = parseDate(r.echoed_at);
     const hour = formatHour(date);
 
@@ -179,7 +192,11 @@ const draw = (elem, csv) => {
   svg.append('g')
     .attr('class', 'x axis')
     .attr('transform', `translate(0, ${height})`)
-    .call(d3.axisBottom(x).ticks(24).tickFormat(d3.timeFormat('%H')));
+    .call(
+      d3.axisBottom(x)
+        .ticks(parseInt(width / 42, 10))
+        .tickFormat(d3.timeFormat('%H')),
+    );
 
   // Add the Y Axis
   svg.append('g')
@@ -202,6 +219,14 @@ const draw = (elem, csv) => {
     });
 };
 
+const init = (e, csv) => {
+  source = csv;
+  elem = e;
+  draw();
+};
+
+window.addEventListener('resize', draw);
+
 export default () => ({ csv }) => (
   <div class='graph-holder hourly'>
     <div class='linestyle-selectors'>
@@ -214,7 +239,7 @@ export default () => ({ csv }) => (
         <div>?! rexpls</div>
       </label>
     </div>
-    <div class='graph' oncreate={e => draw(e, csv)}>
+    <div class='line-graph' oncreate={e => init(e, csv)}>
     </div>
   </div>
 );

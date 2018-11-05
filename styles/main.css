@@ -4,8 +4,17 @@ body {
   /* background: linear-gradient(to bottom, #cfe7fa 0%,#6393c1 100%); */
   color: #717171;
   font-family: 'Comic Sans MS', cursive, sans-serif;
+  width:100%;
+  height:100%;
+  padding: 0;
+  margin: 0;
 }
 
+html {
+
+  width:100%;
+  height:100%;
+}
 label {
   cursor: pointer;
 }
@@ -17,4 +26,4 @@ label > div {
 }
 
 @import url('./line-chart.css');
-@import url('./block-chart.css');
+@import url('./bar-chart.css');
